@@ -1,0 +1,21 @@
+{
+  "name": "stream-to-slack",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "author": "Saahil <neon@saahild.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@slack/web-api": "^7.7.0",
+    "dotenv": "^16.4.5",
+    "prisma": "^5.21.1",
+    "puppeteer": "^23.6.1",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
