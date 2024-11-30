@@ -27,8 +27,20 @@ puppeteer
   
      })
    page.on("popup", async (popup) => {
-    
+    popup?.close()
    })
+   browser.on('targetcreated', async (target) => {
+    // Check if the target is a page (popup)
+    if (target.type() === 'page') {
+      const popup = await target.page();
+      console.log(await page.url())
+    if(await page.url() === "about:blank") {
+      console.log('Popup detected, closing it...');
+      await popup?.close();
+    }
+    }
+  });
+
     let cookies_ok = false;
     try {
 const cookies = require('../cookies.json');
@@ -102,7 +114,8 @@ await page.click('[data-qa="huddle_screen_share_button"]')
 
 await wait(1000)
 const the_share_page = await browser.newPage()
-function handleCmd(string: string, respond: (r: string) => void) {
+
+async function handleCmd(string: string, respond: (r: string) => void) {
     const args = string.split(' ')
     const cmd = args.shift()?.toLowerCase()
     if(cmd === 'goto') {
@@ -110,8 +123,8 @@ function handleCmd(string: string, respond: (r: string) => void) {
     }
     if(cmd == "click") {
         try {
-            the_share_page.waitForSelector(args[0], { timeout: 1000 })
-            the_share_page.click(args[0])
+            the_share_page.waitForSelector(args.join(" "), { timeout: 1000 })
+            the_share_page.click(args.join(" "))
         } catch (e: any) {
             respond(e.toString())
         }
@@ -122,6 +135,22 @@ function handleCmd(string: string, respond: (r: string) => void) {
         }).catch(() => {
             respond('false')
         })
+    }
+    if(cmd == "yt") {
+        the_share_page.goto(`https://www.youtube-nocookie.com/embed/${args[0]}?autoplay=1`)
+        await the_share_page.waitForNavigation();
+      //   try {
+      //     the_share_page.waitForSelector("body", { timeout: 1000 })
+      //     the_share_page.click("body")
+      // } catch (e: any) {
+      //     respond(e.toString())
+      // }
+    }
+    if(cmd == "clickxy") {
+        the_share_page.mouse.click(parseInt(args[0]), parseInt(args[1]))
+    }
+    if(cmd == "type") {
+        the_share_page.keyboard.type(args.join(" "))
     }
 }
 
@@ -144,7 +173,7 @@ function handleCmd(string: string, respond: (r: string) => void) {
           rl.prompt();
           
           // Handle user input
-          rl.on('line', (input) => {
+          rl.on('line', async (input) => {
             try {
               if (input.trim() === 'exit') {
                 console.log('Exiting REPL...');
@@ -157,7 +186,7 @@ function handleCmd(string: string, respond: (r: string) => void) {
           
               // Print the result of the evaluated expression
             //   console.log(input);
-              handleCmd(input, console.log)
+              await handleCmd(input, console.log)
               // Show the prompt again
               rl.prompt();
             } catch (error: any) {
@@ -170,8 +199,8 @@ function handleCmd(string: string, respond: (r: string) => void) {
      console.debug(`#close`)
      the_share_page.close()
 await    page.bringToFront()
-// await page.click()
-await wait(30_000)
+await page.click('[data-qa="huddle_mini_player_leave_button"]')
+await wait(1_000)
 process.exit(0)
           });
     }
